@@ -1,0 +1,40 @@
+name: Continuous integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "recursive"
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: ros-tooling/setup-ros@v0.6
+        with:
+          required-ros-distributions: noetic
+      - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: sudo apt install -y protobuf-compiler
+
+      - run: |
+         source /opt/ros/noetic/setup.bash
+         cargo build
+      - run: |
+         source /opt/ros/noetic/setup.bash
+         ./ci_test.sh
