@@ -5,8 +5,8 @@ fn main() {
     // Create publisher
     let cmd_vel_pub = rosrust::publish("/amiga/cmd_vel", 2).unwrap();
 
-    // Create object that maintains 50Hz between sleep requests
-    let rate = rosrust::rate(50.0);
+    // Create object that maintains 20Hz between sleep requests
+    let rate = rosrust::rate(20.0);
 
     let mut count = 0;
 
@@ -29,7 +29,7 @@ fn main() {
         // Send string message to topic via publisher
         cmd_vel_pub.send(msg).unwrap();
 
-        // Sleep to maintain 50Hz rate
+        // Sleep to maintain 20Hz rate
         rate.sleep();
         count += 1;
 
