@@ -104,7 +104,7 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short, long, default_value_t = 50070)]
+    #[arg(short, long, default_value_t = 50060)]
     port: u32,
     #[arg(short, long, default_value_t = false)]
     test_mode: bool,
@@ -117,9 +117,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
-    let args = Args::parse();
-    let port = args.port;
-    let address = format!("[::1]:{port}");
+    let args: Args = Args::parse();
+    let port: u32 = args.port;
+    let address: String = format!("[::1]:{port}");
 
     let server = AmigaMockService {};
     Server::builder()

@@ -112,7 +112,7 @@ impl AmgigRosBridgeGrpcClient {
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short, long, default_value_t = 50070)]
+    #[arg(short, long, default_value_t = 50060)]
     port: u32,
     #[arg(short, long, default_value_t = false)]
     test_mode: bool,
@@ -126,9 +126,9 @@ fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     // parse arguments using the popular clap crate.
-    let args = Args::parse();
-    let port = args.port;
-    let is_test_mode = args.test_mode;
+    let args: Args = Args::parse();
+    let port: u32 = args.port;
+    let is_test_mode: bool = args.test_mode;
 
     if is_test_mode {
         info!("Test mode: starting up");

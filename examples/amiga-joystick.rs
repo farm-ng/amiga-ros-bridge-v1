@@ -117,7 +117,7 @@ fn main() {
         rosrust::init("amiga_joystick");
         let cmd_vel_pub = rosrust::publish("/amiga/cmd_vel", 2).unwrap();
 
-        let rate_hz = 50.0;
+        let rate_hz = 20.0;
         let delta_t = 1.0 / rate_hz;
         let rate = rosrust::rate(rate_hz);
 
