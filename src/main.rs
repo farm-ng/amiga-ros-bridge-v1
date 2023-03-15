@@ -91,27 +91,7 @@ impl AmgigRosBridgeGrpcClient {
         rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
         is_test_mode: bool,
     ) {
-        let stream = self
-            .client
-            .send_vehicle_twist_command(RosToGrpcStream { rx });
-        let mut stream = stream.await.unwrap().into_inner();
-
-        let handle = tokio::spawn(async move {
-            let mut count = 0;
-
-            loop {
-                // forward the stream to the server and do nothing with the reply
-                let _ = stream.next().await;
-
-                count += 1;
-                if is_test_mode && count > 10 {
-                    info!("Test mode: shutting down");
-                    break;
-                }
-            }
-        })
-        .await
-        .unwrap();
+        debug!("Attempting to connect to stream_vehicle_twist_state");
 
         let mut stream = self
             .client
@@ -119,26 +99,53 @@ impl AmgigRosBridgeGrpcClient {
             .await
             .unwrap()
             .into_inner();
+        debug!("stream_vehicle_twist_state connected");
 
-        let state_pub = rosrust::publish("/amiga/vel", 100).unwrap();
-        let mut count = 0; // message counter
+        let handler = tokio::spawn(async move {
+            let state_pub = rosrust::publish("/amiga/vel", 100).unwrap();
+            let mut count = 0; // message counter
 
-        // iterate over the stream
-        while let Some(maybe_reply) = stream.next().await {
-            // println!("\treceived: {:?}", item.unwrap());
-            let reply = maybe_reply.unwrap();
-            let twist_state: Twist2d = reply.state.unwrap();
+            // iterate over the stream
+            while let Some(maybe_reply) = stream.next().await {
+                // println!("\treceived: {:?}", item.unwrap());
+                let reply = maybe_reply.unwrap();
+                let twist_state: Twist2d = reply.state.unwrap();
 
-            // convert to ROS TwistStamped
-            let msg = twist_stamped_from_state_reply(count, reply.stamp, twist_state);
+                // convert to ROS TwistStamped
+                let msg = twist_stamped_from_state_reply(count, reply.stamp, twist_state);
 
-            // republish messages to ROS
-            state_pub.send(msg).unwrap();
-            count += 1; // increment message counter
+                // republish messages to ROS
+                state_pub.send(msg).unwrap();
+                count += 1; // increment message counter
+            }
+        });
+
+        debug!("send_vehicle_twist_command connected");
+
+
+        let stream = self
+            .client
+            .send_vehicle_twist_command(RosToGrpcStream { rx });
+        let mut stream = stream.await.unwrap().into_inner();
+        debug!("send_vehicle_twist_command connected");
+
+        let mut count = 0;
+
+        loop {
+            // forward the stream to the server and do nothing with the reply
+            let _ = stream.next().await;
+
+            count += 1;
+            if is_test_mode && count > 10 {
+                info!("Test mode: shutting down");
+                break;
+            }
         }
 
-        // stream is dropped here and the disconnect info is send to server
+        handler.await.unwrap();
     }
+
+    // stream is dropped here and the disconnect info is send to server
 }
 
 #[derive(Parser, Debug)]
