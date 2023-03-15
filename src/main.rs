@@ -91,18 +91,13 @@ impl AmgigRosBridgeGrpcClient {
         rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
         is_test_mode: bool,
     ) {
-
         let stream = self
-        .client
-        .send_vehicle_twist_command(RosToGrpcStream { rx });
-    let mut stream = stream.await.unwrap().into_inner();
-
+            .client
+            .send_vehicle_twist_command(RosToGrpcStream { rx });
+        let mut stream = stream.await.unwrap().into_inner();
 
         let handle = tokio::spawn(async move {
             let mut count = 0;
-
-         
-
 
             loop {
                 // forward the stream to the server and do nothing with the reply
@@ -115,7 +110,8 @@ impl AmgigRosBridgeGrpcClient {
                 }
             }
         })
-        .await.unwrap();
+        .await
+        .unwrap();
 
         let mut stream = self
             .client
@@ -141,7 +137,6 @@ impl AmgigRosBridgeGrpcClient {
             count += 1; // increment message counter
         }
 
-        
         // stream is dropped here and the disconnect info is send to server
     }
 }
