@@ -3,7 +3,7 @@ use futures::stream::Stream;
 use futures::StreamExt;
 use ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
 use ros_bridge::grpc::farm_ng::canbus::proto::{
-    SendVehicleTwistCommandReply, SendVehicleTwistCommandRequest, Twist2d,
+    SendVehicleTwistCommandRequest, Twist2d,
     StreamVehicleTwistStateRequest
 };
 use rosrust::Time;
@@ -46,6 +46,36 @@ impl Stream for RosToGrpcStream {
     }
 }
 
+// convert StreamVehicleTwistStateReply to TwistStamped
+fn twist_stamped_from_state_reply(
+    count: u32,
+    stamp: f64,
+    state: Twist2d,
+) -> rosrust_msg::geometry_msgs::TwistStamped {
+    rosrust_msg::geometry_msgs::TwistStamped {
+        header: rosrust_msg::std_msgs::Header {
+            seq: count,
+            stamp: Time {
+                sec: stamp as u32,
+                nsec: (stamp.fract() * 1.0e9) as u32,
+            },
+            frame_id: "amiga".to_owned(),
+        },
+        twist: rosrust_msg::geometry_msgs::Twist {
+            linear: rosrust_msg::geometry_msgs::Vector3 {
+                x: state.linear_velocity_x as f64,
+                y: state.linear_velocity_y as f64,
+                z: 0.0,
+            },
+            angular: rosrust_msg::geometry_msgs::Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: state.angular_velocity as f64,
+            },
+        },
+    }
+}
+
 impl AmgigRosBridgeGrpcClient {
     async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
     where
@@ -64,7 +94,7 @@ impl AmgigRosBridgeGrpcClient {
             .unwrap()
             .into_inner();
 
-        let state_pub = rosrust::publish("/amiga/state", 100).unwrap();
+        let state_pub = rosrust::publish("/amiga/vel", 100).unwrap();
         let mut count = 0;  // message counter
 
         // iterate over the stream
@@ -73,30 +103,10 @@ impl AmgigRosBridgeGrpcClient {
             let reply = maybe_reply.unwrap();
             let twist_state: Twist2d = reply.state.unwrap();
 
-            // republish messages to ROS
-            let msg = rosrust_msg::geometry_msgs::TwistStamped {
-                header: rosrust_msg::std_msgs::Header {
-                    seq: count,
-                    stamp: Time {
-                        sec: reply.stamp as u32,
-                        nsec: (reply.stamp.fract() * 1.0e9) as u32,
-                    },
-                    frame_id: "amiga".to_owned(),
-                },
-                twist: rosrust_msg::geometry_msgs::Twist {
-                    linear: rosrust_msg::geometry_msgs::Vector3 {
-                        x: twist_state.linear_velocity_x as f64,
-                        y: twist_state.linear_velocity_y as f64,
-                        z: 0.0,
-                    },
-                    angular: rosrust_msg::geometry_msgs::Vector3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: twist_state.angular_velocity as f64,
-                    },
-                },
-            };
+            // convert to ROS TwistStamped
+            let msg = twist_stamped_from_state_reply(count, reply.stamp, twist_state);
 
+            // republish messages to ROS
             state_pub.send(msg).unwrap();
             count += 1;  // increment message counter
         }
@@ -109,7 +119,7 @@ impl AmgigRosBridgeGrpcClient {
         rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
         is_test_mode: bool,
     ) {
-        let vel_pub = rosrust::publish("/amiga/vel", 100).unwrap();
+        //let vel_pub = rosrust::publish("/amiga/vel", 100).unwrap();
 
         let mut count = 0;
 
@@ -120,35 +130,37 @@ impl AmgigRosBridgeGrpcClient {
         let mut stream = stream.await.unwrap().into_inner();
 
         loop {
-            let received = stream.next().await;
-            let reply: SendVehicleTwistCommandReply = received.unwrap().unwrap();
-            let state: Twist2d = reply.state.unwrap();
+            // forward the stream to the server and do nothing with the reply
+            let _ = stream.next().await;
 
-            // republish messages to ROS
-            let msg = rosrust_msg::geometry_msgs::TwistStamped {
-                header: rosrust_msg::std_msgs::Header {
-                    seq: count,
-                    stamp: Time {
-                        sec: reply.stamp as u32,
-                        nsec: (reply.stamp.fract() * 1.0e9) as u32,
-                    },
-                    frame_id: "amiga".to_owned(),
-                },
-                twist: rosrust_msg::geometry_msgs::Twist {
-                    linear: rosrust_msg::geometry_msgs::Vector3 {
-                        x: state.linear_velocity_x as f64,
-                        y: state.linear_velocity_y as f64,
-                        z: 0.0,
-                    },
-                    angular: rosrust_msg::geometry_msgs::Vector3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: state.angular_velocity as f64,
-                    },
-                },
-            };
+            //let reply: SendVehicleTwistCommandReply = received.unwrap().unwrap();
+            //let state: Twist2d = reply.state.unwrap();
 
-            vel_pub.send(msg).unwrap();
+            //// republish messages to ROS
+            //let msg = rosrust_msg::geometry_msgs::TwistStamped {
+            //    header: rosrust_msg::std_msgs::Header {
+            //        seq: count,
+            //        stamp: Time {
+            //            sec: reply.stamp as u32,
+            //            nsec: (reply.stamp.fract() * 1.0e9) as u32,
+            //        },
+            //        frame_id: "amiga".to_owned(),
+            //    },
+            //    twist: rosrust_msg::geometry_msgs::Twist {
+            //        linear: rosrust_msg::geometry_msgs::Vector3 {
+            //            x: state.linear_velocity_x as f64,
+            //            y: state.linear_velocity_y as f64,
+            //            z: 0.0,
+            //        },
+            //        angular: rosrust_msg::geometry_msgs::Vector3 {
+            //            x: 0.0,
+            //            y: 0.0,
+            //            z: state.angular_velocity as f64,
+            //        },
+            //    },
+            //};
+
+            //vel_pub.send(msg).unwrap();
 
             count += 1;
             if is_test_mode && count > 10 {
