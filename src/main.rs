@@ -3,8 +3,7 @@ use futures::stream::Stream;
 use futures::StreamExt;
 use ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
 use ros_bridge::grpc::farm_ng::canbus::proto::{
-    SendVehicleTwistCommandRequest, Twist2d,
-    StreamVehicleTwistStateRequest
+    SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
 use rosrust::Time;
 use tokio::sync::mpsc;
@@ -87,15 +86,46 @@ impl AmgigRosBridgeGrpcClient {
     }
 
     // async way to forward geometry_msgs::Twist to StreamVehicleTwistStateRequest
-    async fn state_stream_echo(&mut self) {
-        let mut stream = self.client
-            .stream_vehicle_twist_state(StreamVehicleTwistStateRequest{})
+    async fn streams(
+        &mut self,
+        rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
+        is_test_mode: bool,
+    ) {
+
+        let stream = self
+        .client
+        .send_vehicle_twist_command(RosToGrpcStream { rx });
+    let mut stream = stream.await.unwrap().into_inner();
+
+
+        let handle = tokio::spawn(async move {
+            let mut count = 0;
+
+         
+
+
+            loop {
+                // forward the stream to the server and do nothing with the reply
+                let _ = stream.next().await;
+
+                count += 1;
+                if is_test_mode && count > 10 {
+                    info!("Test mode: shutting down");
+                    break;
+                }
+            }
+        })
+        .await.unwrap();
+
+        let mut stream = self
+            .client
+            .stream_vehicle_twist_state(StreamVehicleTwistStateRequest {})
             .await
             .unwrap()
             .into_inner();
 
         let state_pub = rosrust::publish("/amiga/vel", 100).unwrap();
-        let mut count = 0;  // message counter
+        let mut count = 0; // message counter
 
         // iterate over the stream
         while let Some(maybe_reply) = stream.next().await {
@@ -108,66 +138,11 @@ impl AmgigRosBridgeGrpcClient {
 
             // republish messages to ROS
             state_pub.send(msg).unwrap();
-            count += 1;  // increment message counter
+            count += 1; // increment message counter
         }
-        // stream is droped here and the disconnect info is send to server
-    }
 
-    // async way to forward geometry_msgs::Twist to SendVehicleTwistCommandRequest
-    async fn send_command_stream(
-        &mut self,
-        rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
-        is_test_mode: bool,
-    ) {
-        //let vel_pub = rosrust::publish("/amiga/vel", 100).unwrap();
-
-        let mut count = 0;
-
-        let stream = self
-            .client
-            .send_vehicle_twist_command(RosToGrpcStream { rx });
-
-        let mut stream = stream.await.unwrap().into_inner();
-
-        loop {
-            // forward the stream to the server and do nothing with the reply
-            let _ = stream.next().await;
-
-            //let reply: SendVehicleTwistCommandReply = received.unwrap().unwrap();
-            //let state: Twist2d = reply.state.unwrap();
-
-            //// republish messages to ROS
-            //let msg = rosrust_msg::geometry_msgs::TwistStamped {
-            //    header: rosrust_msg::std_msgs::Header {
-            //        seq: count,
-            //        stamp: Time {
-            //            sec: reply.stamp as u32,
-            //            nsec: (reply.stamp.fract() * 1.0e9) as u32,
-            //        },
-            //        frame_id: "amiga".to_owned(),
-            //    },
-            //    twist: rosrust_msg::geometry_msgs::Twist {
-            //        linear: rosrust_msg::geometry_msgs::Vector3 {
-            //            x: state.linear_velocity_x as f64,
-            //            y: state.linear_velocity_y as f64,
-            //            z: 0.0,
-            //        },
-            //        angular: rosrust_msg::geometry_msgs::Vector3 {
-            //            x: 0.0,
-            //            y: 0.0,
-            //            z: state.angular_velocity as f64,
-            //        },
-            //    },
-            //};
-
-            //vel_pub.send(msg).unwrap();
-
-            count += 1;
-            if is_test_mode && count > 10 {
-                info!("Test mode: shutting down");
-                break;
-            }
-        }
+        
+        // stream is dropped here and the disconnect info is send to server
     }
 }
 
@@ -214,15 +189,10 @@ fn main() {
     debug!("Connecting to gRPC server at {}", address);
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
-        //AmgigRosBridgeGrpcClient::connect(address)
-        //    .await
-        //    .unwrap()
-        //    .send_command_stream(rx, is_test_mode)
-        //    .await
         AmgigRosBridgeGrpcClient::connect(address)
             .await
             .unwrap()
-            .state_stream_echo()
+            .streams(rx, args.test_mode)
             .await
     });
     info!("Connected to gRPC server.");
