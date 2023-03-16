@@ -149,6 +149,8 @@ impl AmgigRosBridgeGrpcClient {
 
 #[derive(Parser, Debug)]
 struct Args {
+    #[arg(short = 'H', long = "host", default_value_t = String::from("localhost"))]
+    host: String,
     #[arg(short, long, default_value_t = 50060)]
     port: u32,
     #[arg(short, long, default_value_t = false)]
@@ -164,6 +166,7 @@ fn main() {
 
     // parse arguments using the popular clap crate.
     let args: Args = Args::parse();
+    let host: String = args.host;
     let port: u32 = args.port;
     let is_test_mode: bool = args.test_mode;
 
@@ -172,8 +175,6 @@ fn main() {
     }
 
     // launching the tokio runtime
-    let address: String = format!("http://[::1]:{port}");
-    //let address: String = format!("http://192.168.1.98:{port}");
     debug!("Starting up tokio runtime");
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
@@ -187,7 +188,10 @@ fn main() {
         tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
     ) = mpsc::channel(128);
 
+    // set the address of the gRPC server
+    let address: String = format!("http://{host}:{port}");
     debug!("Connecting to gRPC server at {}", address);
+
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
         AmgigRosBridgeGrpcClient::connect(address)
