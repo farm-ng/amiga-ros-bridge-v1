@@ -122,7 +122,6 @@ impl AmgigRosBridgeGrpcClient {
 
         debug!("send_vehicle_twist_command connected");
 
-
         let stream = self
             .client
             .send_vehicle_twist_command(RosToGrpcStream { rx });
@@ -173,8 +172,8 @@ fn main() {
     }
 
     // launching the tokio runtime
-    //let address: String = format!("http://[::1]:{port}");
-    let address: String = format!("http://192.168.1.98:{port}");
+    let address: String = format!("http://[::1]:{port}");
+    //let address: String = format!("http://192.168.1.98:{port}");
     debug!("Starting up tokio runtime");
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
