@@ -157,7 +157,8 @@ struct Args {
     test_mode: bool,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // setting console log level
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::DEBUG)
@@ -222,5 +223,16 @@ fn main() {
     .unwrap();
     debug!("Subscriber thread started to cmd_vel");
 
-    runtime.block_on(handle).unwrap();
+    // runtime.block_on(handle).unwrap();
+
+    // NOTE: this will shutdown the runtime when the user presses Ctrl-C
+    match tokio::signal::ctrl_c().await {
+        Ok(_) => {
+            info!("Ctrl-C received, shutting down");
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
+    }
+
 }
