@@ -8,7 +8,6 @@ use ros_bridge::grpc::farm_ng::canbus::proto::{
     StreamMotorStatesRequest, StreamVehicleTwistStateReply, StreamVehicleTwistStateRequest,
     Twist2d,
 };
-use rosrust_msg::geometry_msgs::Twist;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;

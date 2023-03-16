@@ -98,6 +98,14 @@ Use arrow keys (left, right, up, down) to command velocities to the Amiga.
 
 You can publish `Twist` commands to the ROS bridge on the `/amiga/cmd_vel` topic with the [`rqt_robot_steering`](http://wiki.ros.org/rqt_robot_steering) package.
 
+Install `rqt_robot_steering`, if needed:
+
+```bash
+apt-get install ros-noetic-rqt-robot-steering
+```
+
+Run from your terminal:
+
 ```bash
 rosrun rqt_robot_steering rqt_robot_steering
 # Then change the topic to `/amiga/cmd_vel`
