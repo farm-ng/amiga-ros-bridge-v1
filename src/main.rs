@@ -3,7 +3,7 @@ use futures::stream::Stream;
 use futures::StreamExt;
 use ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
 use ros_bridge::grpc::farm_ng::canbus::proto::{
-    SendVehicleTwistCommandReply, SendVehicleTwistCommandRequest, Twist2d,
+    SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
 use rosrust::Time;
 use tokio::sync::mpsc;
@@ -45,6 +45,36 @@ impl Stream for RosToGrpcStream {
     }
 }
 
+// convert StreamVehicleTwistStateReply to TwistStamped
+fn twist_stamped_from_state_reply(
+    count: u32,
+    stamp: f64,
+    state: Twist2d,
+) -> rosrust_msg::geometry_msgs::TwistStamped {
+    rosrust_msg::geometry_msgs::TwistStamped {
+        header: rosrust_msg::std_msgs::Header {
+            seq: count,
+            stamp: Time {
+                sec: stamp as u32,
+                nsec: (stamp.fract() * 1.0e9) as u32,
+            },
+            frame_id: "amiga".to_owned(),
+        },
+        twist: rosrust_msg::geometry_msgs::Twist {
+            linear: rosrust_msg::geometry_msgs::Vector3 {
+                x: state.linear_velocity_x as f64,
+                y: state.linear_velocity_y as f64,
+                z: 0.0,
+            },
+            angular: rosrust_msg::geometry_msgs::Vector3 {
+                x: 0.0,
+                y: 0.0,
+                z: state.angular_velocity as f64,
+            },
+        },
+    }
+}
+
 impl AmgigRosBridgeGrpcClient {
     async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
     where
@@ -55,51 +85,54 @@ impl AmgigRosBridgeGrpcClient {
         Ok(Self { client })
     }
 
-    async fn stream(
+    // async way to forward geometry_msgs::Twist to StreamVehicleTwistStateRequest
+    async fn streams(
         &mut self,
         rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
         is_test_mode: bool,
     ) {
-        let vel_pub = rosrust::publish("/amiga/vel", 100).unwrap();
+        debug!("Attempting to connect to stream_vehicle_twist_state");
 
-        let mut count = 0;
+        let mut stream = self
+            .client
+            .stream_vehicle_twist_state(StreamVehicleTwistStateRequest {})
+            .await
+            .unwrap()
+            .into_inner();
+        debug!("stream_vehicle_twist_state connected");
+
+        let handler = tokio::spawn(async move {
+            let state_pub = rosrust::publish("/amiga/vel", 100).unwrap();
+            let mut count = 0; // message counter
+
+            // iterate over the stream
+            while let Some(maybe_reply) = stream.next().await {
+                // println!("\treceived: {:?}", item.unwrap());
+                let reply = maybe_reply.unwrap();
+                let twist_state: Twist2d = reply.state.unwrap();
+
+                // convert to ROS TwistStamped
+                let msg = twist_stamped_from_state_reply(count, reply.stamp, twist_state);
+
+                // republish messages to ROS
+                state_pub.send(msg).unwrap();
+                count += 1; // increment message counter
+            }
+        });
+
+        debug!("send_vehicle_twist_command connected");
 
         let stream = self
             .client
             .send_vehicle_twist_command(RosToGrpcStream { rx });
-
         let mut stream = stream.await.unwrap().into_inner();
+        debug!("send_vehicle_twist_command connected");
+
+        let mut count = 0;
 
         loop {
-            let received = stream.next().await;
-            let reply: SendVehicleTwistCommandReply = received.unwrap().unwrap();
-            let states: Twist2d = reply.state.unwrap();
-
-            // republish messages to ROS
-            let msg = rosrust_msg::geometry_msgs::TwistStamped {
-                header: rosrust_msg::std_msgs::Header {
-                    seq: count,
-                    stamp: Time {
-                        sec: reply.stamp as u32,
-                        nsec: (reply.stamp.fract() * 1.0e9) as u32,
-                    },
-                    frame_id: "amiga".to_owned(),
-                },
-                twist: rosrust_msg::geometry_msgs::Twist {
-                    linear: rosrust_msg::geometry_msgs::Vector3 {
-                        x: states.linear_velocity_x as f64,
-                        y: states.linear_velocity_y as f64,
-                        z: 0.0,
-                    },
-                    angular: rosrust_msg::geometry_msgs::Vector3 {
-                        x: 0.0,
-                        y: 0.0,
-                        z: states.angular_velocity as f64,
-                    },
-                },
-            };
-
-            vel_pub.send(msg).unwrap();
+            // forward the stream to the server and do nothing with the reply
+            let _ = stream.next().await;
 
             count += 1;
             if is_test_mode && count > 10 {
@@ -107,18 +140,25 @@ impl AmgigRosBridgeGrpcClient {
                 break;
             }
         }
+
+        handler.await.unwrap();
     }
+
+    // stream is dropped here and the disconnect info is send to server
 }
 
 #[derive(Parser, Debug)]
 struct Args {
+    #[arg(short = 'H', long = "host", default_value_t = String::from("localhost"))]
+    host: String,
     #[arg(short, long, default_value_t = 50060)]
     port: u32,
     #[arg(short, long, default_value_t = false)]
     test_mode: bool,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     // setting console log level
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::DEBUG)
@@ -127,6 +167,7 @@ fn main() {
 
     // parse arguments using the popular clap crate.
     let args: Args = Args::parse();
+    let host: String = args.host;
     let port: u32 = args.port;
     let is_test_mode: bool = args.test_mode;
 
@@ -135,7 +176,6 @@ fn main() {
     }
 
     // launching the tokio runtime
-    let address: String = format!("http://[::1]:{port}");
     debug!("Starting up tokio runtime");
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
@@ -149,13 +189,16 @@ fn main() {
         tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
     ) = mpsc::channel(128);
 
+    // set the address of the gRPC server
+    let address: String = format!("http://{host}:{port}");
     debug!("Connecting to gRPC server at {}", address);
+
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
         AmgigRosBridgeGrpcClient::connect(address)
             .await
             .unwrap()
-            .stream(rx, is_test_mode)
+            .streams(rx, args.test_mode)
             .await
     });
     info!("Connected to gRPC server.");
@@ -180,5 +223,16 @@ fn main() {
     .unwrap();
     debug!("Subscriber thread started to cmd_vel");
 
-    runtime.block_on(handle).unwrap();
+    // runtime.block_on(handle).unwrap();
+
+    // NOTE: this will shutdown the runtime when the user presses Ctrl-C
+    match tokio::signal::ctrl_c().await {
+        Ok(_) => {
+            info!("Ctrl-C received, shutting down");
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+        }
+    }
+
 }
