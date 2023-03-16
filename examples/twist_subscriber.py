@@ -3,7 +3,7 @@ from geometry_msgs.msg import TwistStamped
 
 def callback(msg: TwistStamped) -> None:
     rospy.loginfo(f"{rospy.get_caller_id()}: I heard {msg}")
-    
+
 def listener() -> None:
 
     # In ROS, nodes are uniquely named. If two nodes with the same
