@@ -1,10 +1,10 @@
-use clap::Parser;
-use futures::stream::Stream;
-use futures::StreamExt;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
+use clap::Parser;
+use futures::stream::Stream;
+use futures::StreamExt;
 use rosrust::Time;
 use tokio::sync::mpsc;
 use tonic::Status;
@@ -149,7 +149,7 @@ impl AmgigRosBridgeGrpcClient {
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short = 'H', long = "host", default_value_t = String::from("localhost"))]
+    #[arg(short = 'H', long = "host", default_value_t = String::from("[::1]"))]
     host: String,
     #[arg(short, long, default_value_t = 50060)]
     port: u32,
@@ -237,5 +237,4 @@ fn main() {
     //        eprintln!("Error: {}", e);
     //    }
     //}
-
 }
