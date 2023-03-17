@@ -25,9 +25,10 @@ The ROS bridge allows you to publish [`Twist`](http://docs.ros.org/en/noetic/api
 
 ### Clone this repository
 
-** [optional] `roscd` to your ROS workspace and
-
 Clone the repository and initialize the submodule.
+
+** [optional] `roscd` to your ROS workspace and clone this repository there.
+
 
 ```bash
 git clone https://github.com/farm-ng/amiga-ros-bridge.git
@@ -39,7 +40,7 @@ git submodule update --init
 - [ROS Noetic install instructions](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - [Rust install instructions](https://www.rust-lang.org/learn/get-started).
 
-## Run the bridgh (with ROS commands)
+## Run the bridge (with ROS commands)
 
 ### Terminal 1
 
@@ -80,7 +81,7 @@ and that you know the IP address of the Amiga.
 rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
 ```
 
-## Steps to follow (wihout ROS commands)
+## Steps to follow (without ROS commands)
 
 ### Terminal 1
 
