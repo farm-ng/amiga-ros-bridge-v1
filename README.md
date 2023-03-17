@@ -25,6 +25,8 @@ The ROS bridge allows you to publish [`Twist`](http://docs.ros.org/en/noetic/api
 
 ### Clone this repository
 
+** [optional] `roscd` to your ROS workspace and
+
 Clone the repository and initialize the submodule.
 
 ```bash
@@ -37,7 +39,48 @@ git submodule update --init
 - [ROS Noetic install instructions](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - [Rust install instructions](https://www.rust-lang.org/learn/get-started).
 
-## Steps to follow
+## Run the bridgh (with ROS commands)
+
+### Terminal 1
+
+Start ROS core:
+
+```bash
+source /opt/ros/noetic/setup.bash
+roscore
+```
+
+### Terminal 2
+
+Go to your ROS workspace and source the setup.bash file:
+
+```bash
+cd ~/catkin_ws
+source ~/catkin_ws/devel/setup.bash
+```
+
+Compile the package `amiga_ros_bridge`:
+
+```bash
+catkin_make clean # optionally, clean the workspace
+catkin_make
+```
+
+Run the package in the robot as follows:
+
+```bash
+rosrun amiga_ros_bridge amiga_ros_bridge -H localhost -p 50060
+```
+
+Alternatively, you can run the package in you computer as follows.
+Make sure that the Amiga is connected to the same network as your computer
+and that you know the IP address of the Amiga.
+
+```bash
+rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
+```
+
+## Steps to follow (wihout ROS commands)
 
 ### Terminal 1
 
@@ -119,6 +162,19 @@ You can subscribe to measured `TwistStamped` states of the amiga with ROS comman
 ```bash
 rostopic echo /amiga/vel
 ```
+
+## Try the examples
+
+We have provided some examples to help you get started. You will find the examples in the `examples` directory.
+
+### Python
+
+- [`twist_publisher.py`](examples/twist_publisher.py): Publishes a `Twist` message on the `/amiga/cmd_vel` topic.
+- [`twist_subscriber.py`](examples/twist_subscriber.py): Subscribes to the `/amiga/vel` topic and prints the received `TwistStamped` messages.
+
+### Rust
+
+- [`amiga-joystick.rs`](examples/amiga-joystick.rs): A simple joystick to command velocities to the Amiga and print received velocity states.
 
 ## Do you want to know more?
 

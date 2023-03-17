@@ -1,8 +1,8 @@
 use clap::Parser;
 use futures::stream::Stream;
 use futures::StreamExt;
-use ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
-use ros_bridge::grpc::farm_ng::canbus::proto::{
+use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
+use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
 use rosrust::Time;
@@ -203,6 +203,8 @@ async fn main() {
     });
     info!("Connected to gRPC server.");
 
+    // connect to ROS
+    // TODO: add a check to see if roscore is running, if not, exit.
     debug!("Attempting to connect to roscore");
     rosrust::init("amiga_ros_bridge");
     info!("Connected to roscore");
