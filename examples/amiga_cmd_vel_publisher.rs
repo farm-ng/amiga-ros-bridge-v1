@@ -1,6 +1,6 @@
 fn main() {
     // Initialize node
-    rosrust::init("amiga_cmd_vel_test");
+    rosrust::init("amiga_cmd_vel_publisher");
 
     // Create publisher
     let cmd_vel_pub = rosrust::publish("/amiga/cmd_vel", 2).unwrap();

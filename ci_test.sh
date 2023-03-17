@@ -3,7 +3,7 @@ cargo build
 roslaunch launch/test_launch.launch &
 sleep 2
 cargo run --example amiga-mock-server &
-cargo run --example test-amiga-cmd_vel &
+cargo run --example amiga_cmd_vel_publisher &
 cargo run -- --test-mode &
-cargo run --example test-amiga-vel
+cargo run --example amiga_vel_subscriber
 echo DONE

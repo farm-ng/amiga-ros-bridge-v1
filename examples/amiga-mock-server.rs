@@ -1,8 +1,8 @@
 use futures::Stream;
-use ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_server::{
+use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_server::{
     CanbusService, CanbusServiceServer,
 };
-use ros_bridge::grpc::farm_ng::canbus::proto::{
+use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     SendCanbusMessageReply, SendCanbusMessageRequest, SendVehicleTwistCommandReply,
     SendVehicleTwistCommandRequest, StreamCanbusReply, StreamCanbusRequest, StreamMotorStatesReply,
     StreamMotorStatesRequest, StreamVehicleTwistStateReply, StreamVehicleTwistStateRequest,

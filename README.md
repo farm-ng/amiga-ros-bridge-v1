@@ -1,7 +1,14 @@
-# How to test the amiga-ROS bridge in simulation
+# ROS bridge for the Amiga
 
-***This is currently without Amiga HW in the loop***
+[![Build Status](https://travis-ci.com/farm-ng/amiga-ros-bridge.svg?branch=master)](https://travis-ci.com/farm-ng/amiga-ros-bridge)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/farm-ng/amiga-ros-bridge)](https://github.com/farm-ng/amiga-ros-bridge/releases/latest)
+[![License](https://img.shields.io/badge/License-ADK-blue.svg)](https://github.com/farm-ng/farm-ng-amiga/blob/main/LICENSE)
+[![ROS](https://img.shields.io/badge/ROS-Noetic-blue)](https://www.ros.org)
+[![Rust](https://img.shields.io/badge/rust-1.66.0+-93450a.svg?logo=rust)](https://www.rust-lang.org)
 
+This repository contains a ROS bridge for the Farm-ng Amiga platform written in [Rust](https://www.rust-lang.org/).
+
+> **Disclaimer:** the Amiga stack does not leverage ROS for control, but rather uses a gRPC service for control. This bridge is provided as a convenience for users who wish to use ROS for control. For performance critical applications, we recommend using the gRPC service directly.
 
 ## Overview
 
@@ -29,7 +36,6 @@ Clone the repository and initialize the submodule.
 
 ** [optional] `roscd` to your ROS workspace and clone this repository there.
 
-
 ```bash
 git clone https://github.com/farm-ng/amiga-ros-bridge.git
 git submodule update --init
@@ -40,7 +46,7 @@ git submodule update --init
 - [ROS Noetic install instructions](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - [Rust install instructions](https://www.rust-lang.org/learn/get-started).
 
-## Run the bridge (with ROS commands)
+## Run the bridge
 
 ### Terminal 1
 
@@ -81,7 +87,64 @@ and that you know the IP address of the Amiga.
 rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
 ```
 
-## Steps to follow (without ROS commands)
+## Control the Amiga
+
+### Experimental Amiga Joystick
+
+You can start the **experimental** amiga-joystick app to command velocities
+to the Amiga (e.g. the mock server) and print received velocity states:
+
+> Warning: This is not stable and may require multiple attempts at launching for this to come up.
+
+```bash
+source /opt/ros/noetic/setup.bash
+cargo run --example amiga-joystick
+```
+
+Use arrow keys (left, right, up, down) to command velocities to the Amiga.
+
+### Stable ROS packages
+
+You can publish `Twist` commands to the ROS bridge on the `/amiga/cmd_vel` topic with the [`rqt_robot_steering`](http://wiki.ros.org/rqt_robot_steering) package.
+
+Install `rqt_robot_steering`, if needed:
+
+```bash
+apt-get install ros-noetic-rqt-robot-steering
+```
+
+Run from your terminal:
+
+```bash
+rosrun rqt_robot_steering rqt_robot_steering
+# Then change the topic to `/amiga/cmd_vel`
+```
+
+You can subscribe to measured `TwistStamped` states of the amiga with ROS command line tools.
+
+> Warning: The current implementation of ROS bridge does not stream the measured state on `/amiga/vel` if you are not sending commands on the `/amiga/cmd_vel` topic.
+> The `rqt_robot_steering` does not send commands when the linear & angular velocities are both zeroed out, so the measured state stream will pause if they are both zero.
+
+```bash
+rostopic echo /amiga/vel
+```
+
+## Try the examples
+
+We have provided some examples to help you get started. You will find the examples in the `examples` directory.
+
+### Python
+
+- [`amiga_cmd_vel_publisher.py`](examples/amiga_cmd_vel_publisher.py): Publishes a `TwistStamped` message on the `/amiga/cmd_vel` topic.
+- [`amiga_vel_subscriber.py`](examples/amiga_vel_subscriber.py): Subscribes to the `/amiga/vel` topic and prints the received `TwistStamped` messages.
+
+### Rust
+
+- [`amiga_cmd_vel_publisher.rs`](examples/amiga_cmd_vel_publisher.rs): Publishes a `TwistStamped` message on the `/amiga/cmd_vel` topic.
+- [`amiga_vel_subscriber.rs`](examples/amiga_vel_subscriber.rs): Subscribes to the `/amiga/vel` topic and prints the received `TwistStamped` messages.
+- [`amiga-joystick.rs`](examples/amiga-joystick.rs): A simple joystick to command velocities to the Amiga and print received velocity states.
+
+## Run the mocked bridge
 
 ### Terminal 1
 
@@ -124,59 +187,6 @@ You can also try the following stand-in tools:
 - [Experimental Amiga Joystick](#experimental-amiga-joystick)
 - [Stable ROS packages](#stable-ros-packages)
 
-#### Experimental Amiga Joystick
-
-You can start the **experimental** amiga-joystick app to command velocities
-to the Amiga (e.g. the mock server) and print received velocity states:
-
-> Warning: This is not stable and may require multiple attempts at launching for this to come up.
-
-```bash
-source /opt/ros/noetic/setup.bash
-cargo run --example amiga-joystick
-```
-
-Use arrow keys (left, right, up, down) to command velocities to the Amiga.
-
-#### Stable ROS packages
-
-You can publish `Twist` commands to the ROS bridge on the `/amiga/cmd_vel` topic with the [`rqt_robot_steering`](http://wiki.ros.org/rqt_robot_steering) package.
-
-Install `rqt_robot_steering`, if needed:
-
-```bash
-apt-get install ros-noetic-rqt-robot-steering
-```
-
-Run from your terminal:
-
-```bash
-rosrun rqt_robot_steering rqt_robot_steering
-# Then change the topic to `/amiga/cmd_vel`
-```
-
-You can subscribe to measured `TwistStamped` states of the amiga with ROS command line tools.
-
-> Warning: The current implementation of ROS bridge does not stream the measured state on `/amiga/vel` if you are not sending commands on the `/amiga/cmd_vel` topic.
-> The `rqt_robot_steering` does not send commands when the linear & angular velocities are both zeroed out, so the measured state stream will pause if they are both zero.
-
-```bash
-rostopic echo /amiga/vel
-```
-
-## Try the examples
-
-We have provided some examples to help you get started. You will find the examples in the `examples` directory.
-
-### Python
-
-- [`twist_publisher.py`](examples/twist_publisher.py): Publishes a `Twist` message on the `/amiga/cmd_vel` topic.
-- [`twist_subscriber.py`](examples/twist_subscriber.py): Subscribes to the `/amiga/vel` topic and prints the received `TwistStamped` messages.
-
-### Rust
-
-- [`amiga-joystick.rs`](examples/amiga-joystick.rs): A simple joystick to command velocities to the Amiga and print received velocity states.
-
 ## Do you want to know more?
 
-Inspect ci_test.sh.
+Inspect [`ci_test.sh`](ci_test.sh) for a full example of how to run the bridge in a CI environment.

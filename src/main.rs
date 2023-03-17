@@ -194,7 +194,7 @@ async fn main() {
     debug!("Connecting to gRPC server at {}", address);
 
     // the gRPC client takes the receiver rx.
-    let handle = runtime.spawn(async move {
+    let _ = runtime.spawn(async move {
         AmgigRosBridgeGrpcClient::connect(address)
             .await
             .unwrap()
