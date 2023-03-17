@@ -117,6 +117,10 @@ impl AmgigRosBridgeGrpcClient {
                 // republish messages to ROS
                 state_pub.send(msg).unwrap();
                 count += 1; // increment message counter
+                if is_test_mode && count > 5000 {
+                    info!("Test mode: shutting down command stream");
+                    break;
+                }
             }
         });
 
@@ -135,8 +139,8 @@ impl AmgigRosBridgeGrpcClient {
             let _ = stream.next().await;
 
             count += 1;
-            if is_test_mode && count > 10 {
-                info!("Test mode: shutting down");
+            if is_test_mode && count > 5000 {
+                info!("Test mode: shutting down state stream");
                 break;
             }
         }
@@ -162,7 +166,7 @@ struct Args {
 fn main() {
     // setting console log level
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::DEBUG)
+        .with_max_level(Level::INFO)
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
