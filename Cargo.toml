@@ -1,5 +1,5 @@
 [package]
-name = "ros-bridge"
+name = "amiga-ros-bridge"
 version = "0.1.0"
 edition = "2021"
 

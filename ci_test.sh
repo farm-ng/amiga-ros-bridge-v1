@@ -1,6 +1,6 @@
 #!/bin/bash
 cargo build
-roslaunch test_launch.launch &
+roslaunch launch/test_launch.launch &
 sleep 2
 cargo run --example amiga-mock-server &
 cargo run --example test-amiga-cmd_vel &
