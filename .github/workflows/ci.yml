@@ -26,15 +26,15 @@ jobs:
       - uses: ros-tooling/setup-ros@v0.6
         with:
           required-ros-distributions: noetic
-      - run: "source /opt/ros/noetic/setup.bash && rosnode --help"
-
+      #- run: "source /opt/ros/noetic/setup.bash && rosnode --help"
       - uses: Swatinem/rust-cache@v2
-
-      - run: sudo apt install -y protobuf-compiler
-
-      - run: |
-         source /opt/ros/noetic/setup.bash
-         cargo build
-      - run: |
-         source /opt/ros/noetic/setup.bash
-         ./ci_test.sh
+      - name: Install dependencies
+        run: sudo apt install -y protobuf-compiler
+      - name: Compile the project
+        run: |
+          source /opt/ros/noetic/setup.bash
+          cargo build
+      - name: Run the tests
+        run: |
+          source /opt/ros/noetic/setup.bash
+          ./ci_test.sh
