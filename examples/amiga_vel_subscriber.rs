@@ -7,7 +7,7 @@ fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
     // Initialize node
-    rosrust::init("amiga/vel listener");
+    rosrust::init("amiga_vel_subcriber");
     let arc_count = std::sync::Arc::new(std::sync::Mutex::<u32>::new(0));
     let arc_count_clone = arc_count.clone();
     let _subscriber_raii = rosrust::subscribe(
@@ -20,7 +20,7 @@ fn main() {
         },
     )
     .unwrap();
-    info!("/amiga/vel subscriber launched");
+    info!("amiga_vel_subscriber launched");
     let rate = rosrust::rate(0.0);
 
     // Block the thread until a count=10

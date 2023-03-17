@@ -26,7 +26,6 @@ jobs:
       - uses: ros-tooling/setup-ros@v0.6
         with:
           required-ros-distributions: noetic
-      #- run: "source /opt/ros/noetic/setup.bash && rosnode --help"
       - uses: Swatinem/rust-cache@v2
       - name: Install dependencies
         run: sudo apt install -y protobuf-compiler
