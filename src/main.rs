@@ -157,8 +157,9 @@ struct Args {
     test_mode: bool,
 }
 
-#[tokio::main]
-async fn main() {
+//#[tokio::main]
+//async fn main() {
+fn main() {
     // setting console log level
     let subscriber = FmtSubscriber::builder()
         .with_max_level(Level::DEBUG)
@@ -194,7 +195,7 @@ async fn main() {
     debug!("Connecting to gRPC server at {}", address);
 
     // the gRPC client takes the receiver rx.
-    let _ = runtime.spawn(async move {
+    let handle = runtime.spawn(async move {
         AmgigRosBridgeGrpcClient::connect(address)
             .await
             .unwrap()
@@ -225,16 +226,16 @@ async fn main() {
     .unwrap();
     debug!("Subscriber thread started to cmd_vel");
 
-    // runtime.block_on(handle).unwrap();
+    runtime.block_on(handle).unwrap();
 
     // NOTE: this will shutdown the runtime when the user presses Ctrl-C
-    match tokio::signal::ctrl_c().await {
-        Ok(_) => {
-            info!("Ctrl-C received, shutting down");
-        }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-        }
-    }
+    //match tokio::signal::ctrl_c().await {
+    //    Ok(_) => {
+    //        info!("Ctrl-C received, shutting down");
+    //    }
+    //    Err(e) => {
+    //        eprintln!("Error: {}", e);
+    //    }
+    //}
 
 }

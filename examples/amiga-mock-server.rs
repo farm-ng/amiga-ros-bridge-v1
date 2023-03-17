@@ -1,3 +1,4 @@
+use clap::Parser;
 use futures::Stream;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_server::{
     CanbusService, CanbusServiceServer,
@@ -147,8 +148,6 @@ impl CanbusService for AmigaMockService {
         ))
     }
 }
-
-use clap::Parser;
 
 #[derive(Parser, Debug)]
 struct Args {
