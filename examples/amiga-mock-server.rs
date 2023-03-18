@@ -1,4 +1,3 @@
-use futures::Stream;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_server::{
     CanbusService, CanbusServiceServer,
 };
@@ -8,6 +7,8 @@ use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     StreamMotorStatesRequest, StreamVehicleTwistStateReply, StreamVehicleTwistStateRequest,
     Twist2d,
 };
+use clap::Parser;
+use futures::Stream;
 use std::pin::Pin;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
@@ -148,8 +149,6 @@ impl CanbusService for AmigaMockService {
     }
 }
 
-use clap::Parser;
-
 #[derive(Parser, Debug)]
 struct Args {
     #[arg(short, long, default_value_t = 50060)]
@@ -172,6 +171,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server = AmigaMockService {
         twist_state: Arc::new(Mutex::new(Twist2d::default())),
     };
+    info!("Trying to start server.");
+
     Server::builder()
         .add_service(CanbusServiceServer::new(server))
         .serve(address.parse()?)

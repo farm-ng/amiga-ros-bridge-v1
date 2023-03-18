@@ -1,10 +1,10 @@
-use clap::Parser;
-use futures::stream::Stream;
-use futures::StreamExt;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::CanbusServiceClient;
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
+use clap::Parser;
+use futures::stream::Stream;
+use futures::StreamExt;
 use rosrust::Time;
 use tokio::sync::mpsc;
 use tonic::Status;
@@ -117,6 +117,10 @@ impl AmgigRosBridgeGrpcClient {
                 // republish messages to ROS
                 state_pub.send(msg).unwrap();
                 count += 1; // increment message counter
+                if is_test_mode && count > 5000 {
+                    info!("Test mode: shutting down command stream");
+                    break;
+                }
             }
         });
 
@@ -135,8 +139,8 @@ impl AmgigRosBridgeGrpcClient {
             let _ = stream.next().await;
 
             count += 1;
-            if is_test_mode && count > 10 {
-                info!("Test mode: shutting down");
+            if is_test_mode && count > 5000 {
+                info!("Test mode: shutting down state stream");
                 break;
             }
         }
@@ -149,7 +153,7 @@ impl AmgigRosBridgeGrpcClient {
 
 #[derive(Parser, Debug)]
 struct Args {
-    #[arg(short = 'H', long = "host", default_value_t = String::from("localhost"))]
+    #[arg(short = 'H', long = "host", default_value_t = String::from("[::1]"))]
     host: String,
     #[arg(short, long, default_value_t = 50060)]
     port: u32,
@@ -157,11 +161,12 @@ struct Args {
     test_mode: bool,
 }
 
-#[tokio::main]
-async fn main() {
+//#[tokio::main]
+//async fn main() {
+fn main() {
     // setting console log level
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::DEBUG)
+        .with_max_level(Level::INFO)
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
@@ -194,7 +199,7 @@ async fn main() {
     debug!("Connecting to gRPC server at {}", address);
 
     // the gRPC client takes the receiver rx.
-    let _ = runtime.spawn(async move {
+    let handle = runtime.spawn(async move {
         AmgigRosBridgeGrpcClient::connect(address)
             .await
             .unwrap()
@@ -225,16 +230,15 @@ async fn main() {
     .unwrap();
     debug!("Subscriber thread started to cmd_vel");
 
-    // runtime.block_on(handle).unwrap();
+    runtime.block_on(handle).unwrap();
 
     // NOTE: this will shutdown the runtime when the user presses Ctrl-C
-    match tokio::signal::ctrl_c().await {
-        Ok(_) => {
-            info!("Ctrl-C received, shutting down");
-        }
-        Err(e) => {
-            eprintln!("Error: {}", e);
-        }
-    }
-
+    //match tokio::signal::ctrl_c().await {
+    //    Ok(_) => {
+    //        info!("Ctrl-C received, shutting down");
+    //    }
+    //    Err(e) => {
+    //        eprintln!("Error: {}", e);
+    //    }
+    //}
 }
