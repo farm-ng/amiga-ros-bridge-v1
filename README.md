@@ -1,6 +1,6 @@
 # ROS bridge for the Amiga
 
-[![Build Status](https://travis-ci.com/farm-ng/amiga-ros-bridge.svg?branch=master)](https://travis-ci.com/farm-ng/amiga-ros-bridge)
+[![Continuous integration](https://github.com/farm-ng/amiga-ros-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/farm-ng/amiga-ros-bridge/actions/workflows/ci.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/farm-ng/amiga-ros-bridge)](https://github.com/farm-ng/amiga-ros-bridge/releases/latest)
 [![License](https://img.shields.io/badge/License-ADK-blue.svg)](https://github.com/farm-ng/farm-ng-amiga/blob/main/LICENSE)
 [![ROS](https://img.shields.io/badge/ROS-Noetic-blue)](https://www.ros.org)
