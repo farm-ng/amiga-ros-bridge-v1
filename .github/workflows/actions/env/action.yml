@@ -15,4 +15,5 @@ runs:
         required-ros-distributions: noetic
     - uses: Swatinem/rust-cache@v2
     - name: Install dependencies
+      shell: bash
       run: sudo apt install -y protobuf-compiler
