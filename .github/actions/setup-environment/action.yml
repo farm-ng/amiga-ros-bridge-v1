@@ -7,7 +7,7 @@ runs:
       uses: actions-rs/toolchain@v1
       with:
         profile: minimal
-        toolchain: stable
+        toolchain: nightly
         override: true
     - name: Install ROS
       uses: ros-tooling/setup-ros@v0.6
