@@ -26,6 +26,6 @@ jobs:
       - name: Checkout workspace
         uses: actions/checkout@v3
       - name: Setting environment
-        uses: ./.github/workflows/actions/env
+        uses: ./.github/actions/setup-environment
       - name: Run clippy
         run: cargo clippy

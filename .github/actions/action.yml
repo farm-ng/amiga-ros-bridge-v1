@@ -1,4 +1,4 @@
-name: Enviroment setup
+name: setup-environment
 
 runs:
   using: "composite"
