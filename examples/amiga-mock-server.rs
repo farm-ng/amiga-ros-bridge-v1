@@ -81,7 +81,7 @@ impl CanbusService for AmigaMockService {
                 match item {
                     Ok(v) => {
                         let state = v.command.clone().unwrap();
-                        debug!("state received: {:?}", state);
+                        info!("cmd received: {:?}", state);
 
                         let twist = Twist2d {
                             linear_velocity_x: state.linear_velocity_x,
@@ -139,6 +139,8 @@ impl CanbusService for AmigaMockService {
                 }))
                 .await
                 .unwrap();
+                // throttle to 20Hz
+                tokio::time::sleep(std::time::Duration::from_millis(50)).await;
             }
         });
 
@@ -160,7 +162,7 @@ struct Args {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let subscriber = FmtSubscriber::builder()
-        .with_max_level(Level::DEBUG)
+        .with_max_level(Level::INFO)
         .finish();
     tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
 
@@ -171,7 +173,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let server = AmigaMockService {
         twist_state: Arc::new(Mutex::new(Twist2d::default())),
     };
-    info!("Trying to start server.");
+    debug!("Trying to start server.");
 
     Server::builder()
         .add_service(CanbusServiceServer::new(server))

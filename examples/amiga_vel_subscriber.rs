@@ -4,7 +4,7 @@ use tracing_subscriber::FmtSubscriber;
 fn main() {
     tracing::subscriber::set_global_default(
         FmtSubscriber::builder()
-            .with_max_level(Level::DEBUG)
+            .with_max_level(Level::INFO)
             .finish(),
     )
     .expect("setting default subscriber failed");
@@ -30,9 +30,6 @@ fn main() {
     .unwrap();
     info!("amiga_vel_subscriber launched");
 
-    // Block the thread until a count=10
-
-    //loop {
     while rosrust::is_ok() {
         // Sleep to maintain 20Hz rate
         rate.sleep();
