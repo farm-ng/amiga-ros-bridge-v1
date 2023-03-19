@@ -20,3 +20,12 @@ jobs:
             pre-commit install
         - name: Run pre-commit checks
           run: pre-commit run --all-files
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout workspace
+        uses: actions/checkout@v3
+      - name: Setting environment
+        uses: ./.github/workflows/actions/env
+      - name: Run clippy
+        run: cargo clippy
