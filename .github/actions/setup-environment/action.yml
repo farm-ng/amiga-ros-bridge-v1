@@ -3,6 +3,7 @@ name: setup-environment
 runs:
   using: "composite"
   steps:
+    - run: apt-get update && apt install sudo
     - name: Install Rust
       uses: actions-rs/toolchain@v1
       with:
