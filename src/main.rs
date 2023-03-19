@@ -35,6 +35,7 @@ impl Stream for RosToGrpcStream {
         // Poll::Pending (stream not ready yet).
         self.rx.poll_recv(cx).map(|x| match x {
             Some(msg) => {
+                debug!("x: {:?}", msg);
                 let twist = msg.unwrap();
                 Some(SendVehicleTwistCommandRequest {
                     command: Some(Twist2d {
@@ -94,7 +95,6 @@ impl AmgigRosBridgeGrpcClient {
         &mut self,
         mut shutdown_rx1: tokio::sync::broadcast::Receiver<()>,
         rx: tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
-        is_test_mode: bool,
     ) -> Result<(), Box<dyn std::error::Error>> {
         debug!("Attempting to connect to stream_vehicle_twist_state");
 
@@ -111,7 +111,7 @@ impl AmgigRosBridgeGrpcClient {
                 Ok(s) => s,
                 Err(e) => panic!("Failed to start ros publisher: {}", e),
             };
-            let mut count = 0; // message counter
+            let count = 0; // message counter
 
             // iterate over the stream
             while let Some(maybe_reply) = stream.next().await {
@@ -126,11 +126,6 @@ impl AmgigRosBridgeGrpcClient {
 
                 // republish messages to ROS
                 state_pub.send(msg).unwrap();
-                count += 1; // increment message counter
-                if is_test_mode && count > 5000 {
-                    info!("Test mode: shutting down command stream");
-                    break;
-                }
             }
         });
 
@@ -143,8 +138,6 @@ impl AmgigRosBridgeGrpcClient {
         let mut stream = s.into_inner();
         debug!("send_vehicle_twist_command connected");
 
-        let mut count = 0;
-
         loop {
             // forward the stream to the server and do nothing with the reply
             tokio::select! {
@@ -153,12 +146,6 @@ impl AmgigRosBridgeGrpcClient {
                 info!("Shutdown signal received; shutting down.");
                 break;
             }};
-
-            count += 1;
-            if is_test_mode && count > 5000 {
-                info!("Test mode: shutting down state stream");
-                break;
-            }
         }
 
         handler.abort();
@@ -174,8 +161,6 @@ struct Args {
     host: String,
     #[arg(short, long, default_value_t = 50060)]
     port: u32,
-    #[arg(short, long, default_value_t = false)]
-    test_mode: bool,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -191,11 +176,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Args = Args::parse();
     let host: String = args.host;
     let port: u32 = args.port;
-    let is_test_mode: bool = args.test_mode;
-
-    if is_test_mode {
-        info!("Test mode: starting up");
-    }
 
     // launching the tokio runtime
     debug!("Starting up tokio runtime");
@@ -219,7 +199,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
         match AmgigRosBridgeGrpcClient::connect(address).await {
-            Ok(mut client) => match client.streams(shutdown_rx1, rx, args.test_mode).await {
+            Ok(mut client) => match client.streams(shutdown_rx1, rx).await {
                 Ok(_) => warn!("streaming finished."),
                 Err(_) => warn!("streaming error."),
             },
