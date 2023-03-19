@@ -8,6 +8,7 @@ runs:
       with:
         profile: minimal
         toolchain: nightly
+        components: rustfmt, clippy
         override: true
     - name: Install ROS
       uses: ros-tooling/setup-ros@v0.6
