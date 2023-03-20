@@ -13,6 +13,8 @@ use tracing::{debug, info, trace, Level};
 use tracing_subscriber::FmtSubscriber;
 type StdError = Box<dyn std::error::Error + Send + Sync + 'static>;
 type Result<T, E = StdError> = ::std::result::Result<T, E>;
+type TwistSender = tokio::sync::mpsc::Sender<Result<rosrust_msg::geometry_msgs::Twist, Status>>;
+type TwistReceiver = tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>;
 
 struct AmgigRosBridgeGrpcClient {
     client: CanbusServiceClient<tonic::transport::Channel>,
@@ -185,10 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()?;
 
     // Async channels to pass messages across threads in an async tokio context.
-    let (tx, rx): (
-        tokio::sync::mpsc::Sender<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
-        tokio::sync::mpsc::Receiver<Result<rosrust_msg::geometry_msgs::Twist, Status>>,
-    ) = mpsc::channel(128);
+    let (tx, rx): (TwistSender, TwistReceiver) = mpsc::channel(128);
 
     let (shutdown_tx, shutdown_rx1) = broadcast::channel(16);
 

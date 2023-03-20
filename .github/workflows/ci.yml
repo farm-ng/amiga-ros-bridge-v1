@@ -18,17 +18,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: "recursive"
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - uses: ros-tooling/setup-ros@v0.6
-        with:
-          required-ros-distributions: noetic
-      - uses: Swatinem/rust-cache@v2
-      - name: Install dependencies
-        run: sudo apt install -y protobuf-compiler
+      - name: Setting environment
+        uses: ./.github/actions/setup-environment
       - name: Compile the project
         run: |
           source /opt/ros/noetic/setup.bash
