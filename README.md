@@ -38,6 +38,7 @@ Clone the repository and initialize the submodule.
 
 ```bash
 git clone https://github.com/farm-ng/amiga-ros-bridge.git
+cd amiga-ros-bridge
 git submodule update --init
 ```
 
@@ -121,9 +122,6 @@ rosrun rqt_robot_steering rqt_robot_steering
 ```
 
 You can subscribe to measured `TwistStamped` states of the amiga with ROS command line tools.
-
-> Warning: The current implementation of ROS bridge does not stream the measured state on `/amiga/vel` if you are not sending commands on the `/amiga/cmd_vel` topic.
-> The `rqt_robot_steering` does not send commands when the linear & angular velocities are both zeroed out, so the measured state stream will pause if they are both zero.
 
 ```bash
 rostopic echo /amiga/vel
