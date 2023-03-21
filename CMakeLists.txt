@@ -12,16 +12,6 @@ find_package(catkin REQUIRED)
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-#include(FetchContent)
-#
-#FetchContent_Declare(
-#    Corrosion
-#    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
-#    GIT_TAG v0.3.0 # Optionally specify a commit hash, version tag or branch here
-#)
-#FetchContent_MakeAvailable(Corrosion)
-
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -120,15 +110,9 @@ catkin_package(
 
 # NOTE: this works!
 # taken from: https://github.com/adnanademovic/rosrust/issues/113#issuecomment-705083571
-#corrosion_import_crate(MANIFEST_PATH Cargo.toml)
-#
-#corrosion_install(TARGETS ${PROJECT_NAME}
-#  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
 add_custom_target(amiga_ros_bridge
 	ALL
 	COMMAND cargo build --release --manifest-path ${CMAKE_CURRENT_SOURCE_DIR}/Cargo.toml
-	#COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/cargo/release/amiga_ros_bridge ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/amiga_ros_bridge
 	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/target/release/amiga_ros_bridge ${CATKIN_PACKAGE_BIN_DESTINATION}/amiga_ros_bridge
 	COMMENT "Building my Rust library"
 )
