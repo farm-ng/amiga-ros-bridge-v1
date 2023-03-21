@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>amiga-ros-bridge</name>
+  <name>amiga_ros_bridge</name>
   <version>0.0.1</version>
   <description>The amiga-ros-bridge package</description>
 
