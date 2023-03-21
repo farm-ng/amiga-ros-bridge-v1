@@ -105,7 +105,7 @@ cd ~/catkin_ws
 source ~/catkin_ws/devel/setup.bash
 ```
 
-#### Build the ROS bridge executables
+<!-- #### Build the ROS bridge executables
 
 > Warning: this may take ~12 minutes on the first install on the Amiga brain.
 > It should be much faster on your PC.
@@ -114,11 +114,11 @@ source ~/catkin_ws/devel/setup.bash
 cd ~/catkin_ws
 cargo build --manifest-path=src/amiga-ros-bridge/Cargo.toml
 # Same as: cd ~/catkin_ws/src/amiga-ros-bridge && cargo build && cd ~/catkin_ws
-```
+``` -->
 
 #### Compile the package `amiga_ros_bridge`
 
-> Warning: this may take ~12 minutes on the first install on the Amiga brain.
+> Warning: this may take ~25 minutes on the first install on the Amiga brain.
 > It should be much faster on your PC.
 
 ```bash
@@ -193,6 +193,7 @@ Make sure that the Amiga is connected to the same network as your computer
 and that you know both the IP address of the Amiga and of your PC.
 
 Launch the `amiga_ros_bridge` on the Amiga by `ssh`-ing into the ros bridge docker container on the Amiga.
+
 Please contact `info@farm-ng.com` for instructions and credentials.
 
 ```bash
