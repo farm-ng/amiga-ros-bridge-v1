@@ -1,0 +1,16 @@
+<!-- NOTE: this launch file is experimental and not fully functional -->
+<!-- example how to launch the amiga_ros_bridge -->
+<launch>
+    <!-- the configuration to connect against the Amiga -->
+    <arg name="host" default="localhost"/>
+    <arg name="port" default="50060"/>
+
+    <!-- the main ros-bridge package -->
+    <node pkg="amiga_ros_bridge" type="amiga_ros_bridge" name="amiga_ros_bridge" output="screen">
+        <param name="host" value="$(arg host)"/>
+        <param name="port" value="$(arg port)"/>
+    </node>
+
+    <node pkg="amiga_ros_bridge" type="amiga_vel_subscriber.py" name="amiga_vel_subscriber" output="screen">
+    </node>
+</launch>
