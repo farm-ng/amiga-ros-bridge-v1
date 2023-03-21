@@ -77,7 +77,7 @@ Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand c
 So this command will become, e.g.:
 
 ```bash
-export ROS_MASTER_URI=http://192.168.1.76:11311
+export ROS_MASTER_URI=http://192.168.1.98:11311
 ```
 
 For more information see: [Running ROS across multiple machines](http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
@@ -125,6 +125,23 @@ catkin_make
 ```bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
 rosrun amiga-ros-bridge amiga-ros-bridge -H localhost -p 50060
+```
+
+Now you will be able to connect to the ROS topics running on the amiga.
+Confirm this with:
+
+```bash
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+rostopic list
+```
+
+And you should see:
+
+```bash
+/amiga/cmd_vel
+/amiga/vel
+/rosout
+/rosout_agg
 ```
 
 Alternatively, you can run the package in your computer as follows.
