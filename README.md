@@ -57,30 +57,81 @@ git submodule update --init
 cd ~/catkin_ws
 ```
 
+### Build the ROS bridge
+
+Go to your ROS workspace and source the setup.bash file:
+
+```bash
+cd ~/catkin_ws
+source ~/catkin_ws/devel/setup.bash
+```
+
+#### Build the ROS bridge executables
+
+> Warning: this may take ~12 minutes on the first install on the Amiga brain
+
+```bash
+cd ~/catkin_ws
+cargo build --manifest-path=src/amiga-ros-bridge/Cargo.toml
+# Same as: cd ~/catkin_ws/src/amiga-ros-bridge && cargo build && cd ~/catkin_ws
+```
+
+#### Compile the package `amiga_ros_bridge`
+
+> Warning: this may take ~12 minutes on the first install on the Amiga brain
+
+```bash
+cd ~/catkin_ws
+catkin_make clean # optionally, clean the workspace
+catkin_make
+```
+
 ## Run the bridge
 
 ### Specifying the ROS Master
 
 In order to connect to the same ROS Master when running ROS nodes on multiple devices,
-you must specify all nodes to be on the same ROS Master.
+you must specify all nodes to be on the same `ROS_MASTER_URI`, but with their own `ROS_IP`.
 
-If you want to connect to the `roscore` running on your Amiga,
-you must export the `ROS_MASTER_URI` before starting the `roscore`
+If you want to connect to the `roscore` and `amiga_ros_bridge` running on your Amiga,
+you must export the `ROS_MASTER_URI` and `ROS_IP` before starting the `roscore`
 and before running any node that will connect to that ROS Master.
-
 
 ```bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<AMIGA_IP>
 ```
 
 Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand corner of your Amiga brain home screen.
-So this command will become, e.g.:
+So this command would become, e.g.:
 
 ```bash
 export ROS_MASTER_URI=http://192.168.1.98:11311
+export ROS_IP=192.168.1.98
 ```
 
-For more information see: [Running ROS across multiple machines](http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
+Meanwhile, your dev station should be set up to connect to that ROS master.
+
+```bash
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<DEV_STATION_IP>
+```
+
+Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand corner of your Amiga brain home screen.
+And `<DEV_STATION_IP>` corresponds to the IP address on your PC running ROS, connected to the same network as the Amiga.
+
+> Hint: `<DEV_STATION_IP>` is found with `ifconfig`.
+
+So this command would become, e.g.:
+
+```bash
+export ROS_MASTER_URI=http://192.168.1.98:11311
+export ROS_IP=192.168.1.123
+```
+
+For more information see:
+- [Running ROS across multiple machines](http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
+- [Specify `ROS_IP` for running on multiple machines](https://answers.ros.org/question/349095/ros-on-multiple-machine-not-working-properly/?answer=398784#post-id-398784)
 
 ### Terminal 1
 
@@ -88,8 +139,8 @@ Start ROS core:
 
 ```bash
 source ~/catkin_ws/devel/setup.bash
-# OR: source /opt/ros/noetic/setup.bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<AMIGA_IP>
 roscore
 ```
 
@@ -102,28 +153,11 @@ cd ~/catkin_ws
 source ~/catkin_ws/devel/setup.bash
 ```
 
-#### Build the ROS bridge executables
-
-> Warning: this may take ~10 minutes on the first install on the Amiga brain
-
-```bash
-cd ~/catkin_ws
-cargo build --manifest-path=src/amiga-ros-bridge/Cargo.toml
-# Same as: cd ~/catkin_ws/src/amiga-ros-bridge && cargo build && cd ~/catkin_ws
-```
-
-#### Compile the package `amiga_ros_bridge`
-
-```bash
-cd ~/catkin_ws
-catkin_make clean # optionally, clean the workspace
-catkin_make
-```
-
 #### Run the package in the robot as follows
 
 ```bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<AMIGA_IP>
 rosrun amiga_ros_bridge amiga_ros_bridge -H localhost -p 50060
 ```
 
@@ -132,6 +166,7 @@ Confirm this with:
 
 ```bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<DEV_STATION_IP>
 rostopic list
 ```
 
@@ -153,6 +188,9 @@ rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
 ```
 
 ## Control the Amiga
+
+> NOTE: If controlling the robot with a ROS connection over the network,
+make sure to follow the [Specifying the ROS Master](#specifying-the-ros-master) instrcutions.
 
 ### Experimental Amiga Joystick
 
