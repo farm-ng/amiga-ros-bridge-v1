@@ -11,6 +11,6 @@
         <param name="port" value="$(arg port)"/>
     </node>
 
-    <node pkg="amiga_ros_bridge" type="examples/amiga_vel_subscriber.py" name="amiga_vel_subscriber" output="screen">
+    <node pkg="amiga_ros_bridge" type="amiga_vel_subscriber.py" name="amiga_vel_subscriber" output="screen">
     </node>
 </launch>
