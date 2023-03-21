@@ -59,6 +59,29 @@ cd ~/catkin_ws
 
 ## Run the bridge
 
+### Specifying the ROS Master
+
+In order to connect to the same ROS Master when running ROS nodes on multiple devices,
+you must specify all nodes to be on the same ROS Master.
+
+If you want to connect to the `roscore` running on your Amiga,
+you must export the `ROS_MASTER_URI` before starting the `roscore`
+and before running any node that will connect to that ROS Master.
+
+
+```bash
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+```
+
+Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand corner of your Amiga brain home screen.
+So this command will become, e.g.:
+
+```bash
+export ROS_MASTER_URI=http://192.168.1.76:11311
+```
+
+For more information see: [Running ROS across multiple machines](http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
+
 ### Terminal 1
 
 Start ROS core:
@@ -66,6 +89,7 @@ Start ROS core:
 ```bash
 source ~/catkin_ws/devel/setup.bash
 # OR: source /opt/ros/noetic/setup.bash
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
 roscore
 ```
 
@@ -99,10 +123,11 @@ catkin_make
 #### Run the package in the robot as follows
 
 ```bash
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
 rosrun amiga-ros-bridge amiga-ros-bridge -H localhost -p 50060
 ```
 
-Alternatively, you can run the package in you computer as follows.
+Alternatively, you can run the package in your computer as follows.
 Make sure that the Amiga is connected to the same network as your computer
 and that you know the IP address of the Amiga.
 

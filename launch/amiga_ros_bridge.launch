@@ -6,7 +6,7 @@
     <arg name="port" default="50060"/>
 
     <!-- the main ros-bridge package -->
-    <node pkg="amiga_ros_bridge" type="amiga_ros_bridge" name="amiga_ros_bridge" output="screen">
+    <node pkg="amiga-ros-bridge" type="amiga-ros-bridge" name="amiga-ros-bridge" output="screen">
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
     </node>
