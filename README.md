@@ -124,7 +124,7 @@ catkin_make
 
 ```bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
-rosrun amiga-ros-bridge amiga-ros-bridge -H localhost -p 50060
+rosrun amiga_ros_bridge amiga_ros_bridge -H localhost -p 50060
 ```
 
 Now you will be able to connect to the ROS topics running on the amiga.
@@ -149,7 +149,7 @@ Make sure that the Amiga is connected to the same network as your computer
 and that you know the IP address of the Amiga.
 
 ```bash
-rosrun amiga-ros-bridge amiga-ros-bridge -H 192.168.1.98 -p 50060
+rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
 ```
 
 ## Control the Amiga

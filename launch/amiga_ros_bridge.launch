@@ -1,5 +1,5 @@
 <!-- NOTE: this launch file is experimental and not fully functional -->
-<!-- example how to launch the amiga-ros-bridge -->
+<!-- example how to launch the amiga_ros_bridge -->
 <launch>
     <!-- the main ros-bridge package -->
     <node pkg="amiga_ros_bridge" type="amiga_ros_bridge" name="amiga_ros_bridge" output="screen">
