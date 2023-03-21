@@ -37,7 +37,6 @@ The ROS bridge allows you to publish [`Twist`](http://docs.ros.org/en/noetic/api
 - [ROS Noetic install instructions](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - [Rust install instructions](https://www.rust-lang.org/learn/get-started).
 
-
 ### Catkin workspace
 
 Create a catkin workspace, if you don't already have one, following the instructions at
@@ -130,36 +129,23 @@ export ROS_IP=192.168.1.123
 ```
 
 For more information see:
+
 - [Running ROS across multiple machines](http://wiki.ros.org/ROS/Tutorials/MultipleMachines)
 - [Specify `ROS_IP` for running on multiple machines](https://answers.ros.org/question/349095/ros-on-multiple-machine-not-working-properly/?answer=398784#post-id-398784)
 
 ### Terminal 1
 
-Start ROS core:
+Launch the `amiga_ros_bridge` on the Amiga.
+Contact info@farm-ng.com for ssh login credentials.
 
 ```bash
 source ~/catkin_ws/devel/setup.bash
 export ROS_MASTER_URI=http://<AMIGA_IP>:11311
 export ROS_IP=<AMIGA_IP>
-roscore
+roslaunch amiga_ros_bridge amiga_ros_bridge.launch
 ```
 
 ### Terminal 2
-
-Go to your ROS workspace and source the setup.bash file:
-
-```bash
-cd ~/catkin_ws
-source ~/catkin_ws/devel/setup.bash
-```
-
-#### Run the package in the robot as follows
-
-```bash
-export ROS_MASTER_URI=http://<AMIGA_IP>:11311
-export ROS_IP=<AMIGA_IP>
-rosrun amiga_ros_bridge amiga_ros_bridge -H localhost -p 50060
-```
 
 Now you will be able to connect to the ROS topics running on the amiga.
 Confirm this with:
@@ -184,13 +170,13 @@ Make sure that the Amiga is connected to the same network as your computer
 and that you know the IP address of the Amiga.
 
 ```bash
-rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
+roslaunch amiga_ros_bridge amiga_ros_bridge.launch host:=<AMIGA_IP>
 ```
 
 ## Control the Amiga
 
 > NOTE: If controlling the robot with a ROS connection over the network,
-make sure to follow the [Specifying the ROS Master](#specifying-the-ros-master) instrcutions.
+make sure to follow the [Specifying the ROS Master](#specifying-the-ros-master) instructions.
 
 ### Experimental Amiga Joystick
 
