@@ -30,22 +30,30 @@ The ROS bridge allows you to publish [`Twist`](http://docs.ros.org/en/noetic/api
 
 ## Prerequisites
 
-### Clone this repository
-
-Clone the repository and initialize the submodule.
-
-** [optional] `roscd` to your ROS workspace and clone this repository there.
-
-```bash
-git clone https://github.com/farm-ng/amiga-ros-bridge.git
-cd amiga-ros-bridge
-git submodule update --init
-```
-
 ### Install dependencies
 
 - [ROS Noetic install instructions](http://wiki.ros.org/noetic/Installation/Ubuntu)
 - [Rust install instructions](https://www.rust-lang.org/learn/get-started).
+
+
+### Catkin workspace
+
+Create a catkin workspace, if you don't already have one, following the instructions at
+[ROS Tutorials - create_a_workspace](http://wiki.ros.org/catkin/Tutorials/create_a_workspace)
+
+### Clone this repository
+
+Clone the repository and initialize the submodule.
+
+<!-- ** [optional] `roscd` to your ROS workspace and clone this repository there. -->
+
+```bash
+cd ~/catkin_ws/src
+git clone https://github.com/farm-ng/amiga-ros-bridge.git
+cd amiga-ros-bridge
+git submodule update --init
+cd ~/catkin_ws
+```
 
 ## Run the bridge
 
@@ -54,7 +62,8 @@ git submodule update --init
 Start ROS core:
 
 ```bash
-source /opt/ros/noetic/setup.bash
+source ~/catkin_ws/devel/setup.bash
+# OR: source /opt/ros/noetic/setup.bash
 roscore
 ```
 
@@ -67,17 +76,28 @@ cd ~/catkin_ws
 source ~/catkin_ws/devel/setup.bash
 ```
 
-Compile the package `amiga_ros_bridge`:
+#### Build the ROS bridge executables
+
+> Warning: this may take ~10 minutes on the first install on the Amiga brain
 
 ```bash
+cd ~/catkin_ws
+cargo build --manifest-path=src/amiga-ros-bridge/Cargo.toml
+# Same as: cd ~/catkin_ws/src/amiga-ros-bridge && cargo build && cd ~/catkin_ws
+```
+
+#### Compile the package `amiga_ros_bridge`
+
+```bash
+cd ~/catkin_ws
 catkin_make clean # optionally, clean the workspace
 catkin_make
 ```
 
-Run the package in the robot as follows:
+#### Run the package in the robot as follows
 
 ```bash
-rosrun amiga_ros_bridge amiga_ros_bridge -H localhost -p 50060
+rosrun amiga-ros-bridge amiga-ros-bridge -H localhost -p 50060
 ```
 
 Alternatively, you can run the package in you computer as follows.
@@ -85,7 +105,7 @@ Make sure that the Amiga is connected to the same network as your computer
 and that you know the IP address of the Amiga.
 
 ```bash
-rosrun amiga_ros_bridge amiga_ros_bridge -H 192.168.1.98 -p 50060
+rosrun amiga-ros-bridge amiga-ros-bridge -H 192.168.1.98 -p 50060
 ```
 
 ## Control the Amiga
