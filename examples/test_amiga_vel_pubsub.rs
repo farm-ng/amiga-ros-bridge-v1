@@ -35,7 +35,6 @@ fn main() {
 
     let mut pub_num = 0;
     while rosrust::is_ok() {
-        info!("HERE!!!");
 
         // Create string message
         let msg = rosrust_msg::geometry_msgs::Twist {
@@ -52,8 +51,9 @@ fn main() {
         };
 
         // Send string message to topic via publisher
-        cmd_vel_pub.send(msg).unwrap();
+        cmd_vel_pub.send(msg.clone()).unwrap();
         pub_num += 1;
+        info!("Sent: {:?}", msg);
 
         // Sleep to maintain 20Hz rate
         rate.sleep();

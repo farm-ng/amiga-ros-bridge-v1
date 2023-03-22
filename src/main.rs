@@ -2,7 +2,6 @@ use amiga_ros_bridge::grpc::farm_ng::canbus::proto::canbus_service_client::Canbu
 use amiga_ros_bridge::grpc::farm_ng::canbus::proto::{
     SendVehicleTwistCommandRequest, StreamVehicleTwistStateRequest, Twist2d,
 };
-use clap::Parser;
 use futures::stream::Stream;
 use futures::StreamExt;
 use log::warn;
@@ -157,14 +156,6 @@ impl AmgigRosBridgeGrpcClient {
     // stream is dropped here and the disconnect info is send to server
 }
 
-#[derive(Parser, Debug)]
-struct Args {
-    #[arg(short = 'H', long = "host", default_value_t = String::from("[::1]"))]
-    host: String,
-    #[arg(short, long, default_value_t = 50060)]
-    port: u32,
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // setting console log level
     tracing::subscriber::set_global_default(
@@ -174,10 +165,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )
     .expect("setting default subscriber failed");
 
-    // parse arguments using the popular clap crate.
-    let args: Args = Args::parse();
-    let host: String = args.host;
-    let port: u32 = args.port;
+    // Initialize the ROS node
+    rosrust::init("amiga_ros_bridge");
+    info!("Initialized node amiga_ros_bridge");
+
+    // Read ROS params, used for connecting to GRPC service
+    let host: String = rosrust::param("~host").unwrap().get::<String>().unwrap_or(String::from("localhost"));
+    let port: u32 = rosrust::param("~port").unwrap().get::<u32>().unwrap_or(50060);
 
     // launching the tokio runtime
     debug!("Starting up tokio runtime");
@@ -193,7 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // set the address of the gRPC server
     let address: String = format!("http://{host}:{port}");
-    debug!("Connecting to gRPC server at {}", address);
+    info!("Connecting to gRPC server at {}", address);
 
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
@@ -209,12 +203,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok::<(), Result<(), StdError>>(())
     });
     info!("Connected to gRPC server.");
-
-    // connect to ROS
-    // TODO: add a check to see if roscore is running, if not, exit.
-    debug!("Attempting to connect to roscore");
-    rosrust::init("amiga_ros_bridge");
-    info!("Connected to roscore");
 
     debug!("Start thread to subscribe to cmd_vel");
     // The ROS subscriber takes the sender tx so it can forward received ROS messages to the gRPC
