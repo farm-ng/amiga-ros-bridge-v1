@@ -187,7 +187,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // set the address of the gRPC server
     let address: String = format!("http://{host}:{port}");
-    debug!("Connecting to gRPC server at {}", address);
+    info!("Connecting to gRPC server at {}", address);
 
     // the gRPC client takes the receiver rx.
     let handle = runtime.spawn(async move {
