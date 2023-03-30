@@ -348,10 +348,13 @@ Please refer to [`depthai-ros`](https://github.com/luxonis/depthai-ros) on full 
 
 As of March 29, 2023 - there is no support for visualization in the ROS docker container for the Amiga.
 This means you can use the `depthai-ros` library to connect to the Oak cameras on your amiga,
+use other ROS nodes running on the Amiga for image processing,
 but you will need to stream them over a network to a PC to visualize them.
 This is done by properly setting `ROS_MASTER_URI` & `ROS_IP` on all devices, as explained in [Specifying the ROS Master](#specifying-the-ros-master).
 
-> NOTE: You must stop the oak camera service in your apps launcher setting page so the `depthai-ros` package can access the Oak device (see below).
+> NOTE: You must stop the oak camera service in your apps launcher setting page so the `depthai-ros` package can access the Oak camera device(s).
+>
+> <img src="https://user-images.githubusercontent.com/53625197/228701415-89fb6d36-dce5-4b42-808d-2dd486db91a5.png" width="35%">
 
 **Tips:**
 
@@ -364,7 +367,7 @@ This is done by properly setting `ROS_MASTER_URI` & `ROS_IP` on all devices, as 
   - Pass a Neural Network to run on the Oak
   - Etc.
 
-### Example usage
+### Example `depthai-ros` usage
 
 #### Terminal 1: ssh into the ros container on your amiga
 
@@ -404,6 +407,8 @@ Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand c
 And `<DEV_STATION_IP>` corresponds to the IP address on your PC running ROS, connected to the same network as the Amiga.
 
 Now select the image you want to view based on topic, e.g. `/stereo_inertial_publisher/color/image` or  `/stereo_inertial_publisher/stereo/depth`.
+
+<img src="https://user-images.githubusercontent.com/53625197/228702256-d5ef02d9-98a6-476d-b636-56f66f84822d.png" width="50%">
 
 ## Do you want to know more?
 
