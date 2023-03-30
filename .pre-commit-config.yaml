@@ -8,3 +8,7 @@ repos:
       - id: check-yaml
       - id: check-json
         exclude: docs/
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt

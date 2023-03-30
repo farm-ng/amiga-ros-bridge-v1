@@ -35,7 +35,6 @@ fn main() {
 
     let mut pub_num = 0;
     while rosrust::is_ok() {
-
         // Create string message
         let msg = rosrust_msg::geometry_msgs::Twist {
             linear: rosrust_msg::geometry_msgs::Vector3 {
