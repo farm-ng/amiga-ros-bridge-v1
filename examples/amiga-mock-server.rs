@@ -133,12 +133,17 @@ impl CanbusService for AmigaMockService {
                 {
                     s = state_alias.lock().unwrap().clone();
                 }
-                tx.send(Ok(StreamVehicleTwistStateReply {
+                match tx.send(Ok(StreamVehicleTwistStateReply {
                     stamp: tokio::time::Instant::now().elapsed().as_secs_f64(),
                     state: Some(s),
-                }))
-                .await
-                .unwrap();
+                })).await {
+                    Ok(_) => {}
+                    Err(_e) => {
+                        info!("stream cancelled");
+                        // info!("error: {:?}", e);
+                        break;
+                    }
+                }
                 // throttle to 20Hz
                 tokio::time::sleep(std::time::Duration::from_millis(50)).await;
             }
