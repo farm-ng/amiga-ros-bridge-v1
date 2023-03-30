@@ -170,8 +170,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("Initialized node amiga_ros_bridge");
 
     // Read ROS params, used for connecting to GRPC service
-    let host: String = rosrust::param("~host").unwrap().get::<String>().unwrap_or(String::from("localhost"));
-    let port: u32 = rosrust::param("~port").unwrap().get::<u32>().unwrap_or(50060);
+    let host: String = rosrust::param("~host")
+        .unwrap()
+        .get::<String>()
+        .unwrap_or(String::from("localhost"));
+    let port: u32 = rosrust::param("~port")
+        .unwrap()
+        .get::<u32>()
+        .unwrap_or(50060);
 
     // launching the tokio runtime
     debug!("Starting up tokio runtime");
