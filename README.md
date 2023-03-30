@@ -337,6 +337,78 @@ We have provided some examples to help you get started. You will find the exampl
 - [`amiga_vel_subscriber.rs`](examples/amiga_vel_subscriber.rs): Subscribes to the `/amiga/vel` topic and prints the received `TwistStamped` messages.
 - [`amiga-joystick.rs`](examples/amiga-joystick.rs): A simple joystick to command velocities to the Amiga and print received velocity states.
 
+## Use `depthai-ros` for Oak camera streaming
+
+As of March 29, 2023 - the ROS docker container for the Amiga has a built in installation of [`depthai-ros`](https://github.com/luxonis/depthai-ros).
+This is installed as the `ros-noetic-depthai-ros` apt package.
+
+You can install the March 29, 2023 ROS docker container for the Amiga with the same command you used to install the original ROS docker container for the Amiga.
+
+Please refer to [`depthai-ros`](https://github.com/luxonis/depthai-ros) on full usage of their ROS package.
+
+As of March 29, 2023 - there is no support for visualization in the ROS docker container for the Amiga.
+This means you can use the `depthai-ros` library to connect to the Oak cameras on your amiga,
+use other ROS nodes running on the Amiga for image processing,
+but you will need to stream them over a network to a PC to visualize them.
+This is done by properly setting `ROS_MASTER_URI` & `ROS_IP` on all devices, as explained in [Specifying the ROS Master](#specifying-the-ros-master).
+
+> NOTE: You must stop the oak camera service(s) in your apps launcher setting page so the `depthai-ros` package can access the Oak camera device(s).
+>
+> <img src="https://user-images.githubusercontent.com/53625197/228701415-89fb6d36-dce5-4b42-808d-2dd486db91a5.png" width="35%">
+
+**Tips:**
+
+- We provide a quick example of using the `depthai-ros` to stream images below
+- It is up to you to read their docs to decide which of their launch files / nodes / examples you want to use
+- It is up to you to read their docs to configure / interact with the cameras how you want. E.g.,
+  - Specify `MxId` of the camera you want to stream
+  - Configure for PoE cameras to reduce expected throughput compared to USB (See: https://github.com/luxonis/depthai-ros#poe-cameras)
+  - Get camera calibrations
+  - Pass a Neural Network to run on the Oak
+  - Etc.
+
+### Example `depthai-ros` usage
+
+#### Terminal 1: ssh into the ros container on your amiga
+
+Use an example from [`depthai-ros`](https://github.com/luxonis/depthai-ros) to stream an oak device.
+
+```bash
+source /opt/ros/noetic/setup.bash # Or source your catkin_ws
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<AMIGA_IP>
+roslaunch depthai_examples stereo_inertial_node.launch
+```
+
+Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand corner of your Amiga brain home screen.
+
+> You will see an error that rviz cannot be launched because there is no support for visualization in this docker container.
+> But, if the Oak camera is available, the `depthai-ros` node will start and a camera will be streaming.
+>
+> ```bash
+> ERROR: cannot launch node of type [rviz/rviz]: rviz
+> ROS path [0]=/opt/ros/noetic/share/ros
+> ROS path [1]=/data/home/ros/catkin_ws/src
+> ROS path [2]=/opt/ros/noetic/share
+> ```
+
+#### Terminal 2: A PC on the same network
+
+Watch the the stream from a computer on the same network.
+
+```bash
+source /opt/ros/noetic/setup.bash # Or source your catkin_ws
+export ROS_MASTER_URI=http://<AMIGA_IP>:11311
+export ROS_IP=<DEV_STATION_IP>
+rqt_image_view
+```
+
+Where `<AMIGA_IP>` corresponds to the IP address seen on the bottom right hand corner of your Amiga brain home screen.
+And `<DEV_STATION_IP>` corresponds to the IP address on your PC running ROS, connected to the same network as the Amiga.
+
+Now select the image you want to view based on topic, e.g. `/stereo_inertial_publisher/color/image` or  `/stereo_inertial_publisher/stereo/depth`.
+
+<img src="https://user-images.githubusercontent.com/53625197/228702256-d5ef02d9-98a6-476d-b636-56f66f84822d.png" width="50%">
 
 ## Do you want to know more?
 
