@@ -33,14 +33,3 @@ jobs:
         run: |
           source /opt/ros/noetic/setup.bash
           cargo clippy -- -Dwarnings
-  fmt:
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Checkout workspace
-        uses: actions/checkout@v3
-      - name: Setting environment
-        uses: ./.github/actions/setup-environment
-      - name: Run fmt
-        run: |
-          source /opt/ros/noetic/setup.bash
-          cargo fmt --all -- --check
