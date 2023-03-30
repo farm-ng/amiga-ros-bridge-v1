@@ -352,7 +352,7 @@ use other ROS nodes running on the Amiga for image processing,
 but you will need to stream them over a network to a PC to visualize them.
 This is done by properly setting `ROS_MASTER_URI` & `ROS_IP` on all devices, as explained in [Specifying the ROS Master](#specifying-the-ros-master).
 
-> NOTE: You must stop the oak camera service in your apps launcher setting page so the `depthai-ros` package can access the Oak camera device(s).
+> NOTE: You must stop the oak camera service(s) in your apps launcher setting page so the `depthai-ros` package can access the Oak camera device(s).
 >
 > <img src="https://user-images.githubusercontent.com/53625197/228701415-89fb6d36-dce5-4b42-808d-2dd486db91a5.png" width="35%">
 
