@@ -1,4 +1,13 @@
-# ROS bridge for the Amiga
+# Repository No Longer in Use
+
+**Note: This repository is no longer actively maintained.**
+
+Please visit our new repository for the latest updates and improvements:
+[github.com/farm-ng/amiga-ros-bridge](https://github.com/farm-ng/amiga-ros-bridge)
+
+If you have any questions or need assistance, feel free to contact us at [discourse.farm-ng.com/](https://discourse.farm-ng.com/).
+
+## ROS bridge for the Amiga
 
 [![Continuous integration](https://github.com/farm-ng/amiga-ros-bridge/actions/workflows/ci.yml/badge.svg)](https://github.com/farm-ng/amiga-ros-bridge/actions/workflows/ci.yml)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/farm-ng/amiga-ros-bridge)](https://github.com/farm-ng/amiga-ros-bridge/releases/latest)
@@ -9,6 +18,7 @@
 This repository contains a ROS bridge for the Farm-ng Amiga platform written in [Rust](https://www.rust-lang.org/).
 
 > **Disclaimer:** the Amiga stack does not leverage ROS for control, but rather uses a gRPC service for control. This bridge is provided as a convenience for users who wish to use ROS for control. For performance critical applications, we recommend using the gRPC service directly.
+
 
 ## Overview
 
